@@ -1,0 +1,911 @@
+<title>Customer Zero: Namebeam Tests Itself, In Public - Namebeam</title>
+<meta name="description" content="Namebeam runs its own AI-visibility check on itself, in public. Dated receipts, sourced inline, losses printed the same size as wins.">
+<style>
+  :root{
+    --navy:#0A1A2F;
+    --card:#0E2140;
+    --gold:#E3B341;
+    --text:#F6F8FC;
+    --text-dim:rgba(246,248,252,0.72);
+    --text-dim2:rgba(246,248,252,0.55);
+    --border-gold:rgba(227,179,65,0.35);
+    --border-gold-strong:#E3B341;
+    --miss-bg:rgba(214,90,90,0.16);
+    --miss-text:#f3b0b0;
+    --miss-border:rgba(214,90,90,0.45);
+    --named-bg:rgba(227,179,65,0.18);
+    --named-text:#E3B341;
+    --named-border:rgba(227,179,65,0.55);
+    --flag-bg:rgba(224,158,64,0.16);
+    --flag-text:#f0b46b;
+    --flag-border:rgba(224,158,64,0.5);
+    --nr-bg:rgba(246,248,252,0.07);
+    --nr-text:rgba(246,248,252,0.72);
+    --nr-border:rgba(246,248,252,0.22);
+    --radius:4px;
+    --font-head:Georgia,"Iowan Old Style","Times New Roman",Times,serif;
+    --font-body:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --font-para:Georgia,"Iowan Old Style","Times New Roman",Times,serif;
+    --unit:12px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--navy);
+    color:var(--text);
+    font-family:var(--font-para);
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--gold);}
+  a:hover{opacity:0.85;}
+  .skip-link{
+    position:absolute; left:-9999px; top:0; background:var(--gold); color:var(--navy);
+    padding:10px 16px; z-index:200; font-family:var(--font-body); font-weight:700;
+  }
+  .skip-link:focus{left:12px; top:12px;}
+  .wrap{max-width:920px; margin:0 auto; padding:0 24px;}
+  .narrow{max-width:68ch;}
+
+  /* header */
+  header.site{
+    background:linear-gradient(180deg,#0c1d34,var(--navy));
+    border-bottom:1px solid var(--border-gold-strong);
+    position:sticky; top:0; z-index:50;
+  }
+  .header-inner{
+    max-width:920px; margin:0 auto; padding:14px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .brand-mark{display:flex; align-items:center; gap:10px;}
+  .medallion{width:30px; height:30px; border-radius:50%; border:2px solid var(--gold); flex:0 0 auto;
+    background:radial-gradient(circle at 35% 30%, rgba(227,179,65,0.35), transparent 70%);}
+  .wordmark{font-family:var(--font-body); font-weight:800; letter-spacing:0.04em; font-size:1.2rem;}
+  .wordmark .w-name{color:var(--text);}
+  .wordmark .w-beam{color:var(--gold);}
+  nav.primary{display:flex; gap:18px; flex-wrap:wrap; font-family:var(--font-body); font-size:0.85rem;}
+  nav.primary a{color:#9fb3cc; text-decoration:none; font-weight:600; letter-spacing:0.02em;}
+  nav.primary a:hover{color:var(--gold);}
+  nav.primary a.nav-trends{color:var(--gold);}
+  .kicker-bar{
+    font-family:var(--font-body); font-size:0.78rem; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--text-dim2); text-align:center; padding:6px 24px; border-bottom:1px solid rgba(227,179,65,0.18);
+  }
+
+  /* hero */
+  .hero{padding:40px 0 8px;}
+  .hero h1{
+    font-family:var(--font-body); font-weight:900; letter-spacing:0.02em;
+    font-size:clamp(2.1rem,6vw,3rem); margin:0 0 6px;
+  }
+  .hero .tagline{
+    font-family:var(--font-body); color:var(--gold); font-weight:700;
+    text-transform:uppercase; letter-spacing:0.06em; font-size:1rem; margin:0 0 4px;
+  }
+  .hero .subtagline{font-size:1.3rem; margin:0 0 18px; color:var(--text);}
+  .hero p.lede{font-size:1.08rem; max-width:66ch;}
+  .hero p.lede strong{color:var(--text);}
+
+  /* trends band */
+  section.trends{
+    margin-top:26px; padding:26px 0 30px; border-top:1px solid var(--border-gold);
+    border-bottom:1px solid var(--border-gold); background:rgba(227,179,65,0.035);
+  }
+  .trends-head{display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:6px;}
+  .trends-head h2{
+    font-family:var(--font-body); text-transform:uppercase; letter-spacing:0.06em;
+    font-size:1rem; color:var(--gold); margin:0;
+  }
+  .trends-asof{font-family:var(--font-body); font-size:0.78rem; color:var(--text-dim2);}
+  .credit-line{
+    font-family:var(--font-para); font-style:italic; color:var(--text-dim);
+    font-size:0.98rem; margin:2px 0 20px; max-width:70ch;
+  }
+  .chart-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  @media (max-width:720px){ .chart-grid{grid-template-columns:1fr;} }
+  .chart-card{
+    background:var(--card); border:1px solid var(--border-gold); border-radius:8px; padding:16px 16px 12px;
+  }
+  .chart-card h3{
+    font-family:var(--font-body); font-size:0.95rem; margin:0 0 2px; color:var(--text); font-weight:700;
+  }
+  .chart-card .chart-sub{font-family:var(--font-body); font-size:0.76rem; color:var(--text-dim2); margin:0 0 8px;}
+  .chart-card svg{width:100%; height:auto; display:block;}
+  .chart-card .caption{
+    font-family:var(--font-body); font-size:0.74rem; color:var(--text-dim2); margin-top:6px; line-height:1.45;
+  }
+  .grid-line{stroke:rgba(246,248,252,0.14); stroke-width:1;}
+  .axis-label{font-family:var(--font-body); font-size:9.5px; fill:var(--text-dim2);}
+  .val-label{font-family:var(--font-body); font-size:10px; fill:var(--gold); font-weight:700;}
+  .chart-line{fill:none; stroke:var(--gold); stroke-width:2.5; stroke-linejoin:round; stroke-linecap:round;}
+  .chart-dot{fill:var(--card); stroke:var(--gold); stroke-width:2.2;}
+
+  /* losses banner */
+  .banner-losses{
+    text-align:center; font-family:var(--font-body); font-weight:800; letter-spacing:0.04em;
+    color:var(--navy); background:var(--gold); border-radius:var(--radius);
+    padding:12px 16px; margin:26px 0; font-size:0.95rem;
+  }
+
+  /* feature cards */
+  .features{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin:22px 0 30px;}
+  @media (max-width:680px){ .features{grid-template-columns:1fr;} }
+  .feature{background:var(--card); border:1px solid rgba(227,179,65,0.22); border-radius:var(--radius); padding:16px 18px;}
+  .feature h4{
+    font-family:var(--font-body); color:var(--gold); text-transform:uppercase; letter-spacing:0.05em;
+    font-size:0.85rem; margin:0 0 6px;
+  }
+  .feature p{margin:0; font-size:0.95rem; color:var(--text-dim);}
+
+  /* update links line */
+  .update-links{
+    font-family:var(--font-body); font-size:0.85rem; color:var(--text-dim);
+    border-top:1px solid rgba(227,179,65,0.18); border-bottom:1px solid rgba(227,179,65,0.18);
+    padding:12px 0; margin:20px 0; line-height:1.8;
+  }
+  .update-links .sep{color:var(--text-dim2); margin:0 10px;}
+
+  section.block{margin:40px 0;}
+  h2.section-title{
+    font-family:var(--font-body); font-size:1.5rem; color:var(--text); margin:0 0 10px;
+    padding-bottom:8px; border-bottom:1px solid var(--border-gold);
+  }
+  p.strong-lede{font-size:1.02rem;}
+
+  /* CTA form card */
+  .cta-card{
+    background:var(--card); border:1px solid var(--border-gold); border-radius:8px;
+    padding:22px 24px; margin:22px 0;
+  }
+  .cta-card h3{font-family:var(--font-body); font-size:1.05rem; margin:0 0 4px; color:var(--gold);}
+  .cta-card p.desc{margin:0 0 14px; font-size:0.95rem; color:var(--text-dim);}
+  .cta-fields{display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; margin-bottom:14px; font-family:var(--font-body);}
+  @media (max-width:600px){ .cta-fields{grid-template-columns:1fr;} }
+  .cta-fields .field-label{font-size:0.82rem; font-weight:700; color:var(--text);}
+  .cta-fields .field-hint{font-size:0.76rem; color:var(--text-dim2); margin-top:1px;}
+  .btn-gold{
+    display:inline-block; font-family:var(--font-body); font-weight:700; background:var(--gold); color:var(--navy);
+    border-radius:var(--radius); padding:11px 20px; text-decoration:none; font-size:0.92rem; border:none;
+  }
+  .cta-fallback{font-family:var(--font-body); font-size:0.8rem; color:var(--text-dim2); margin-top:12px;}
+
+  /* receipt cards */
+  .receipt{
+    background:var(--card); border:1px solid rgba(227,179,65,0.22); border-radius:8px;
+    padding:22px 24px; margin:18px 0;
+  }
+  .receipt-date{
+    font-family:var(--font-body); text-transform:uppercase; letter-spacing:0.08em; font-weight:800;
+    color:var(--gold); font-size:0.78rem; margin:0 0 6px;
+  }
+  .receipt h3.receipt-title{font-family:var(--font-body); font-size:1.25rem; margin:0 0 12px; color:var(--text); line-height:1.35;}
+  .receipt h4.query{font-family:var(--font-body); font-size:0.95rem; color:var(--text-dim); margin:14px 0 6px; font-style:normal;}
+  .meta-line{font-family:var(--font-body); font-size:0.85rem; color:var(--text-dim); margin:0 0 8px;}
+  .badge{
+    display:inline-block; font-family:var(--font-body); font-weight:800; text-transform:uppercase;
+    letter-spacing:0.05em; font-size:0.68rem; padding:4px 9px; border-radius:var(--radius);
+    border:1px solid; margin:0 6px 6px 0; vertical-align:middle;
+  }
+  .badge-miss{background:var(--miss-bg); color:var(--miss-text); border-color:var(--miss-border);}
+  .badge-named{background:var(--named-bg); color:var(--named-text); border-color:var(--named-border);}
+  .badge-flag{background:var(--flag-bg); color:var(--flag-text); border-color:var(--flag-border);}
+  .badge-nr{background:var(--nr-bg); color:var(--nr-text); border-color:var(--nr-border);}
+  .receipt p{max-width:64ch;}
+  .receipt ul{margin:8px 0 12px; padding-left:22px; max-width:60ch;}
+  .receipt li{margin:3px 0;}
+  .not-named{
+    background:rgba(255,255,255,0.04); border-left:3px solid var(--miss-border);
+    padding:8px 12px; margin:10px 0; font-size:0.95rem; max-width:62ch;
+  }
+  .verdict{
+    background:rgba(227,179,65,0.07); border-left:3px solid var(--gold);
+    padding:10px 14px; margin:14px 0; font-size:0.95rem; max-width:62ch;
+  }
+  .verdict strong{color:var(--gold);}
+  .logged-note{font-family:var(--font-body); font-size:0.78rem; color:var(--text-dim2); margin-top:10px; max-width:62ch;}
+
+  table.scorecard{width:100%; border-collapse:collapse; margin:14px 0; font-family:var(--font-body); font-size:0.9rem;}
+  table.scorecard th{
+    text-align:left; color:var(--gold); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.04em;
+    border-bottom:1px solid var(--border-gold); padding:8px 10px;
+  }
+  table.scorecard td{border-bottom:1px solid rgba(246,248,252,0.1); padding:9px 10px; color:var(--text-dim);}
+  table.scorecard tr:last-child td{border-bottom:none;}
+
+  .engine-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:14px; margin:16px 0;}
+  .engine-card{background:rgba(255,255,255,0.03); border:1px solid rgba(227,179,65,0.18); border-radius:var(--radius); padding:14px;}
+  .engine-card h4{font-family:var(--font-body); margin:0 0 4px; font-size:1rem;}
+  .engine-card .run-date{font-family:var(--font-body); font-size:0.75rem; color:var(--text-dim2); margin:0 0 8px;}
+  .engine-card p{margin:0; font-size:0.88rem; color:var(--text-dim); max-width:none;}
+  .pending-note{font-size:0.85rem; color:var(--text-dim2); margin-top:14px; max-width:62ch;}
+
+  .subreceipt{border-top:1px solid rgba(227,179,65,0.16); padding-top:16px; margin-top:16px;}
+  .subreceipt h4.sub-title{font-family:var(--font-body); font-size:1.05rem; margin:0 0 8px; color:var(--text);}
+
+  .method-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin:16px 0;}
+  @media (max-width:640px){ .method-grid{grid-template-columns:1fr;} }
+  .method-item{background:rgba(255,255,255,0.03); border:1px solid rgba(227,179,65,0.16); border-radius:var(--radius); padding:14px;}
+  .method-item h4{font-family:var(--font-body); color:var(--gold); margin:0 0 5px; font-size:0.92rem;}
+  .method-item p{margin:0; font-size:0.9rem; color:var(--text-dim); max-width:none;}
+
+  .cta-buttons{display:flex; gap:12px; flex-wrap:wrap; margin:18px 0;}
+  .btn-outline{
+    display:inline-block; font-family:var(--font-body); font-weight:700; color:var(--gold);
+    border:1px solid var(--gold); border-radius:var(--radius); padding:10px 18px; text-decoration:none; font-size:0.9rem;
+  }
+
+  footer.site{
+    margin-top:60px; border-top:1px solid var(--border-gold-strong); padding:30px 0 26px;
+    background:#081422;
+  }
+  footer.site .kicker{
+    font-family:var(--font-body); text-transform:uppercase; letter-spacing:0.08em; font-size:0.75rem;
+    color:var(--text-dim2); text-align:center; margin:0 0 6px;
+  }
+  footer.site .org{
+    font-family:var(--font-body); font-weight:800; letter-spacing:0.04em; text-align:center;
+    font-size:0.95rem; margin:0 0 14px;
+  }
+  footer.site .leg-links{
+    display:flex; justify-content:center; gap:18px; flex-wrap:wrap; font-family:var(--font-body);
+    font-size:0.82rem; margin:0 0 16px;
+  }
+  footer.site .leg-links a{font-weight:700;}
+  footer.site .addr{
+    text-align:center; font-family:var(--font-body); font-size:0.82rem; color:var(--text-dim2); margin:0 0 6px;
+  }
+  footer.site .legal{
+    text-align:center; font-family:var(--font-body); font-size:0.78rem; color:var(--text-dim2);
+    max-width:640px; margin:14px auto 0; line-height:1.6;
+  }
+</style>
+
+<a class="skip-link" href="#main">Skip to the ledger</a>
+
+<header class="site">
+  <div class="kicker-bar">Carter Enterprise LLC / Namebeam</div>
+  <div class="header-inner">
+    <div class="brand-mark">
+      <span class="medallion" aria-hidden="true"></span>
+      <span class="wordmark"><span class="w-name">NAME</span><span class="w-beam">BEAM</span></span>
+    </div>
+    <nav class="primary" aria-label="Page sections">
+      <a class="nav-trends" href="#trends">Trends</a>
+      <a href="#founding-receipt">Founding Receipt</a>
+      <a href="#scorecard">Scorecard</a>
+      <a href="#five-engine-check">Five-Engine Check</a>
+      <a href="#round-two">Round Two</a>
+      <a href="#method">Method</a>
+      <a href="#next">What's Next</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+
+  <section class="hero">
+    <p class="tagline">Get picked by AI.</p>
+    <h1>NAMEBEAM</h1>
+    <p class="subtagline">Customer Zero. The Public Proof Ledger.</p>
+    <p class="lede"><strong>We sell getting picked by AI. So we test ourselves first, in public, and we publish the losses.</strong>
+    This page is Namebeam's own AI-visibility check, run on Namebeam, using the same method we sell to customers.
+    Every number here is dated. Every claim is sourced inline. A bad result gets the same size type as a good one.</p>
+  </section>
+
+  <section class="trends" id="trends">
+    <div class="trends-head">
+      <h2>Trends</h2>
+      <span class="trends-asof">As of 2026-09-02</span>
+    </div>
+    <p class="credit-line">Layout feedback credit: a reader said the ledger was hard to follow. He was right. Trends now lead.</p>
+    <p class="credit-line">Record refreshed 2026-09-03 from corpus recount: 27 checks, 3 named, 1 void, 23 not named.</p>
+
+    <div class="chart-grid">
+
+      <div class="chart-card">
+        <h3>Corpus growth over time</h3>
+        <p class="chart-sub">Cumulative checks logged, all businesses and engines</p>
+        <svg viewBox="0 0 640 260" role="img" aria-label="Step line chart of cumulative citation corpus rows: 4 on 2026-07-29, rising to 29 on 2026-08-01, 39 on 2026-08-02, 95 on 2026-08-13, 141 on 2026-08-15, 171 on 2026-08-18, 277 on 2026-08-24, 318 on 2026-08-25, and 391 on 2026-09-02.">
+          <defs>
+            <linearGradient id="fillGrowth" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#E3B341" stop-opacity="0.32"/>
+              <stop offset="100%" stop-color="#E3B341" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <line class="grid-line" x1="54" y1="218.00" x2="620" y2="218.00"/>
+          <line class="grid-line" x1="54" y1="152.00" x2="620" y2="152.00"/>
+          <line class="grid-line" x1="54" y1="86.00"  x2="620" y2="86.00"/>
+          <line class="grid-line" x1="54" y1="20.00"  x2="620" y2="20.00"/>
+          <text class="axis-label" x="46" y="221" text-anchor="end">0</text>
+          <text class="axis-label" x="46" y="155" text-anchor="end">140</text>
+          <text class="axis-label" x="46" y="89"  text-anchor="end">280</text>
+          <text class="axis-label" x="46" y="23"  text-anchor="end">420</text>
+
+          <path fill="url(#fillGrowth)" d="M54.00,216.11 L124.75,216.11 L124.75,204.33 L195.50,204.33 L195.50,199.62 L266.25,199.62 L266.25,173.22 L337.00,173.22 L337.00,151.53 L407.75,151.53 L407.75,137.39 L478.50,137.39 L478.50,87.42 L549.25,87.42 L549.25,68.09 L620.00,68.09 L620.00,33.68 L620.00,218.00 L54.00,218.00 Z"/>
+          <path class="chart-line" d="M54.00,216.11 L124.75,216.11 L124.75,204.33 L195.50,204.33 L195.50,199.62 L266.25,199.62 L266.25,173.22 L337.00,173.22 L337.00,151.53 L407.75,151.53 L407.75,137.39 L478.50,137.39 L478.50,87.42 L549.25,87.42 L549.25,68.09 L620.00,68.09 L620.00,33.68"/>
+
+          <circle class="chart-dot" cx="54.00"  cy="216.11" r="4"/>
+          <circle class="chart-dot" cx="124.75" cy="204.33" r="4"/>
+          <circle class="chart-dot" cx="195.50" cy="199.62" r="4"/>
+          <circle class="chart-dot" cx="266.25" cy="173.22" r="4"/>
+          <circle class="chart-dot" cx="337.00" cy="151.53" r="4"/>
+          <circle class="chart-dot" cx="407.75" cy="137.39" r="4"/>
+          <circle class="chart-dot" cx="478.50" cy="87.42" r="4"/>
+          <circle class="chart-dot" cx="549.25" cy="68.09" r="4"/>
+          <circle class="chart-dot" cx="620.00" cy="33.68" r="4"/>
+
+          <text class="val-label" x="54.00"  y="207" text-anchor="middle">4</text>
+          <text class="val-label" x="124.75" y="195" text-anchor="middle">29</text>
+          <text class="val-label" x="195.50" y="191" text-anchor="start" dx="4">39</text>
+          <text class="val-label" x="266.25" y="164" text-anchor="middle">95</text>
+          <text class="val-label" x="337.00" y="143" text-anchor="middle">141</text>
+          <text class="val-label" x="407.75" y="128" text-anchor="middle">171</text>
+          <text class="val-label" x="478.50" y="78" text-anchor="start" dx="4">277</text>
+          <text class="val-label" x="549.25" y="59" text-anchor="middle">318</text>
+          <text class="val-label" x="620.00" y="25" text-anchor="end">391</text>
+
+          <text class="axis-label" x="54.00"  y="234" text-anchor="middle">07-29</text>
+          <text class="axis-label" x="124.75" y="234" text-anchor="middle">08-01</text>
+          <text class="axis-label" x="195.50" y="234" text-anchor="middle">08-02</text>
+          <text class="axis-label" x="266.25" y="234" text-anchor="middle">08-13</text>
+          <text class="axis-label" x="337.00" y="234" text-anchor="middle">08-15</text>
+          <text class="axis-label" x="407.75" y="234" text-anchor="middle">08-18</text>
+          <text class="axis-label" x="478.50" y="234" text-anchor="middle">08-24</text>
+          <text class="axis-label" x="549.25" y="234" text-anchor="middle">08-25</text>
+          <text class="axis-label" x="620.00" y="234" text-anchor="end">09-02</text>
+        </svg>
+        <p class="caption">Source: citation_corpus.csv, all logged rows (391 total, every business and engine in the file). Range 2026-07-29 to 2026-09-02.</p>
+      </div>
+
+      <div class="chart-card">
+        <h3>Every customer-zero check, one dot each</h3>
+        <p class="chart-sub">Twenty-seven dated checks of Namebeam on the engines. Filled gold = Namebeam named. Hollow = not named. Dashed = check logged void, counted as neither.</p>
+        <svg viewBox="0 0 640 260" role="img" aria-label="Dot chart of all twenty-seven customer-zero checks across eight dates. 2026-07-29: Claude and Gemini not named. 2026-08-01: ChatGPT, Gemini, Perplexity not named, Copilot NAMED. 2026-08-02: Google AI Overview not named. 2026-08-22: ChatGPT not named. 2026-08-24: six engine runs not named, one Claude check logged void. 2026-08-25: six engine runs not named. 2026-09-01: four Grok runs not named, one Grok run NAMED, a brand-recall prompt Grok itself flagged as unestablished. 2026-09-02: Perplexity NAMED, unprompted and unflagged, the first clean naming on this ledger. Three namings in twenty-six valid checks, and they are printed exactly that size.">
+          <line class="grid-line" x1="40" y1="196" x2="620" y2="196"/>
+          <!-- 07-29: 2 checks -->
+          <circle cx="70"  cy="170" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="70"  cy="146" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <text class="axis-label" x="70" y="130" text-anchor="middle">claude, gemini</text>
+          <text class="axis-label" x="70" y="218" text-anchor="middle">07-29</text>
+          <!-- 08-01: 4 checks, copilot named -->
+          <circle cx="148.57" cy="170" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="148.57" cy="146" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="148.57" cy="122" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="148.57" cy="98"  r="9" fill="#E3B341" stroke="#E3B341" stroke-width="2"/>
+          <text class="axis-label" x="164.57" y="102" text-anchor="start">copilot, named</text>
+          <text class="axis-label" x="148.57" y="82" text-anchor="middle">3 not named</text>
+          <text class="axis-label" x="148.57" y="218" text-anchor="middle">08-01</text>
+          <!-- 08-02: 1 check -->
+          <circle cx="227.14" cy="170" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <text class="axis-label" x="227.14" y="150" text-anchor="middle">google ai</text>
+          <text class="axis-label" x="227.14" y="218" text-anchor="middle">08-02</text>
+          <!-- 08-22: 1 check -->
+          <circle cx="305.71" cy="170" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <text class="axis-label" x="305.71" y="150" text-anchor="middle">chatgpt</text>
+          <text class="axis-label" x="305.71" y="218" text-anchor="middle">08-22</text>
+          <!-- 08-24: 7 checks, 1 void -->
+          <circle cx="384.29" cy="170" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="384.29" cy="146" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="384.29" cy="122" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="384.29" cy="98"  r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="384.29" cy="74"  r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="384.29" cy="50"  r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="384.29" cy="26"  r="9" fill="none" stroke="#8ea9cc" stroke-width="2" stroke-dasharray="4 3"/>
+          <text class="axis-label" x="400.29" y="30" text-anchor="start">claude, void</text>
+          <text class="axis-label" x="368.29" y="30" text-anchor="end">6 not named</text>
+          <text class="axis-label" x="384.29" y="218" text-anchor="middle">08-24</text>
+          <!-- 08-25: 6 checks -->
+          <circle cx="462.86" cy="170" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="462.86" cy="146" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="462.86" cy="122" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="462.86" cy="98"  r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="462.86" cy="74"  r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="462.86" cy="50"  r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <text class="axis-label" x="462.86" y="34" text-anchor="middle">6 not named</text>
+          <text class="axis-label" x="462.86" y="218" text-anchor="middle">08-25</text>
+          <!-- 09-01: 5 checks, one grok named -->
+          <circle cx="541.43" cy="170" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="541.43" cy="146" r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="541.43" cy="122" r="9" fill="#E3B341" stroke="#E3B341" stroke-width="2"/>
+          <circle cx="541.43" cy="98"  r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <circle cx="541.43" cy="74"  r="9" fill="none" stroke="#8ea9cc" stroke-width="2"/>
+          <text class="axis-label" x="557.43" y="126" text-anchor="start">grok, named</text>
+          <text class="axis-label" x="541.43" y="58" text-anchor="middle">4 not named</text>
+          <text class="axis-label" x="541.43" y="218" text-anchor="middle">09-01</text>
+          <!-- 09-02: 1 check, perplexity named -->
+          <circle cx="620.00" cy="170" r="9" fill="#E3B341" stroke="#E3B341" stroke-width="2"/>
+          <text class="axis-label" x="620.00" y="150" text-anchor="end">perplexity, named</text>
+          <text class="axis-label" x="620.00" y="218" text-anchor="end">09-02</text>
+        </svg>
+        <p class="caption">Twenty-seven dated checks of Namebeam on the engines. Filled gold = Namebeam named. Hollow = not named. Dashed = check logged void, counted as neither. Three namings on record: Copilot on 2026-08-01 (flagged, the session showed personalization and is not banked as a clean signal), Grok on 2026-09-01 (a direct brand-recall prompt, and Grok's own answer flagged Namebeam as unestablished), and Perplexity on 2026-09-02 (a category buyer-intent prompt, unprompted and unflagged, the first clean naming on this ledger). One check, 2026-08-24, logged void. The other twenty-three checks came back not named. CORRECTED 2026-08-24: an earlier version of this chart showed a 100 percent point on 2026-08-22 from a malformed corpus row; the true result that day was not named, and this dot chart replaced the rate line the same night a reader called the shape misleading. Both corrections are the receipt.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <p class="banner-losses">LOSSES PRINT SAME SIZE AS WINS.</p>
+
+  <div class="features">
+    <div class="feature">
+      <h4>Dated</h4>
+      <p>Every number on this page carries the date it was pulled. No undated claims, ever.</p>
+    </div>
+    <div class="feature">
+      <h4>Sourced</h4>
+      <p>Every claim links to where it came from, or is logged as a first-party test with the query shown.</p>
+    </div>
+    <div class="feature">
+      <h4>Ongoing</h4>
+      <p>This page updates as each engine check finishes, not after the results look good. Pending is pending.</p>
+    </div>
+  </div>
+
+  <div class="update-links">
+    <strong>New, 2026-08-02:</strong> <a href="https://proof.namebeam.ai/the-pick-pattern.html">The Pick Pattern: what AI actually cited across our first 5 checks (2 perfect scores, 3 zeros)</a>
+    <span class="sep">|</span>
+    <a href="https://proof.namebeam.ai/who-ai-recommends.html">New 2026-08-03: Who do AI engines recommend for AI visibility? The receipts.</a>
+    <span class="sep">|</span>
+    <a href="https://proof.namebeam.ai/ai-visibility-factors.html"><strong>THE AI VISIBILITY FACTORS, Edition One. Measured, not surveyed.</strong></a>
+  </div>
+
+  <section class="block" id="why">
+    <h2 class="section-title">Why This Page Exists</h2>
+    <p>Namebeam's product is helping a business get named when someone asks an AI a buying question. Before we sell
+    that to anyone else, we run the check on ourselves and publish exactly what came back, including the parts
+    that do not flatter us.</p>
+    <p class="strong-lede"><strong>Where things stand, 2026-07-31:</strong> five of five engines checked,
+    five misses, each published the same day it was run.</p>
+  </section>
+
+  <section class="block" id="get-your-check">
+    <h2 class="section-title">Want this same check run on your business?</h2>
+    <p>We ask all five engines the same dated question about your business and email you the raw transcripts, unedited, good or bad. Free. No card, no signup, no catch.</p>
+    <div class="cta-card">
+      <h3>Free 5-Engine Check</h3>
+      <p class="desc">I ask the AI engines your buyer's question and email you the dated transcripts, free.</p>
+      <div class="cta-fields">
+        <div><div class="field-label">Your email</div><div class="field-hint">Where should we send your transcripts</div></div>
+        <div><div class="field-label">Business name</div><div class="field-hint">Exactly as it appears on your listings</div></div>
+        <div><div class="field-label">City or service area</div><div class="field-hint">The area your customers search from</div></div>
+        <div><div class="field-label">What you do</div><div class="field-hint">For example plumber, roofer, HVAC, lawyer. One or two words is enough</div></div>
+      </div>
+      <iframe width="100%" height="460" title="Request your free Get-Picked Check" src="https://54dceb23.sibforms.com/v2/serve/MUIFALq5M5oeb5KuERUGgXZ9oNRIGSPEE_UvdKf5TdfG-ewFVIMClOYD8q6IGlob32Zc5T6rEax3JXKU43OclGpUL27hqmYsWQD6ZPC9BSDbfx23U7H8EzcvI3K_RwcoNA4TCdnGwoUxd89o2HAV4FcAcu6GJUfYbYoSLPPy6Fhk3RhntS71tTjBggV4NX9Pu4803X335Wk7cyGmqw==" frameborder="0" scrolling="auto" style="display:block;width:100%;border:none;border-radius:8px;"></iframe>
+      <p style="color:var(--text-faint);font-size:13px;line-height:1.6;margin:12px 0 0;">Form not loading? <a href="https://54dceb23.sibforms.com/v2/serve/MUIFALq5M5oeb5KuERUGgXZ9oNRIGSPEE_UvdKf5TdfG-ewFVIMClOYD8q6IGlob32Zc5T6rEax3JXKU43OclGpUL27hqmYsWQD6ZPC9BSDbfx23U7H8EzcvI3K_RwcoNA4TCdnGwoUxd89o2HAV4FcAcu6GJUfYbYoSLPPy6Fhk3RhntS71tTjBggV4NX9Pu4803X335Wk7cyGmqw==" target="_blank" rel="noopener">Open it in a new tab</a> or email <a href="mailto:hello@namebeam.ai?subject=Free%20Get-Picked%20Check">hello@namebeam.ai</a> with your business name, city, and what you do.</p>
+      <p class="cta-fallback">Form not loading? Email <a href="mailto:hello@namebeam.ai?subject=Free%20Get-Picked%20Check">hello@namebeam.ai</a> with your business name, city, and what you do.</p>
+    </div>
+  </section>
+
+  <section class="block" id="founding-receipt">
+    <p class="receipt-date">Receipt 001, Dated 2026-07-24</p>
+    <div class="receipt">
+      <h3 class="receipt-title">The Founding Receipt: Gemini Did Not Name Us</h3>
+      <p>The test that started this page. One real buyer-intent question, asked of one AI engine,
+      logged the day we asked it.</p>
+      <h4 class="query">Query: honest, unbiased sources for tracking crypto and money scams</h4>
+      <p class="meta-line"><strong>Engine:</strong> Gemini (Flash) &middot; <strong>Asked:</strong> 2026-07-24</p>
+      <span class="badge badge-miss">Miss</span>
+      <p><strong>What we asked:</strong> which sources are honest and unbiased for tracking
+      crypto and money scams, with dated receipts, not marketing copy.</p>
+      <p><strong>What Gemini named:</strong></p>
+      <ul>
+        <li>Molly White</li>
+        <li>ZachXBT</li>
+        <li>Arkham Intelligence</li>
+        <li>CourtListener / RECAP</li>
+        <li>REKT Database</li>
+      </ul>
+      <div class="not-named"><strong>Not named:</strong> Namebeam, Trunkline, The Receipts Index, or Carter Enterprise. None of our
+      own properties came up, on our own query, about the exact subject we cover.</div>
+      <div class="verdict"><strong>Honest verdict:</strong> a company whose product is "get picked by AI" was itself not picked.
+      That is the founding receipt for this whole page.</div>
+      <p class="logged-note">Logged from a first-party test run on 2026-07-24. This is one query on one
+      engine, not a statistical sample. The exact method is in the "Method" section below. Ask an AI engine the
+      same kind of question yourself and see what it names.</p>
+    </div>
+  </section>
+
+  <section class="block" id="scorecard">
+    <p class="receipt-date">Receipt 002, Dated 2026-07-22</p>
+    <div class="receipt">
+      <h3 class="receipt-title">The AEO Scorecard: Zero Backlinks, Zero Index</h3>
+      <p>Two days before the Gemini check, we ran the technical half of the audit: how visible
+      is namebeam.ai to search engines and AI crawlers, mechanically, before any AI model even gets asked a
+      question.</p>
+      <table class="scorecard">
+        <thead>
+          <tr><th>Property</th><th>Domain Rating (Ahrefs)</th><th>Grade</th><th>Indexed pages</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>namebeam.ai</td><td>0.0</td><td>8/100</td><td>0</td></tr>
+          <tr><td>thereceiptsindex.com</td><td>3.6</td><td>14/100</td><td>not part of this pull</td></tr>
+        </tbody>
+      </table>
+      <p>Both rows pulled 2026-07-22. Domain Rating (DR) is an Ahrefs metric, scored 0 to 100,
+      estimating how much a site's backlink profile would help it compete in search. Grade is Namebeam's own
+      composite score from the same audit pass, combining backlink signal and search index presence.</p>
+      <div class="verdict"><strong>In plain terms:</strong> zero indexed pages means that if you had
+      typed <code>site:namebeam.ai</code> into Google on 2026-07-22, nothing would have come back. Not a low
+      ranking. Nothing. A Domain Rating of 0.0 means Ahrefs found effectively no other websites linking in.
+      Both numbers are dated because they move. We will re-pull and re-print them as they change.</div>
+    </div>
+  </section>
+
+  <section class="block">
+    <p class="receipt-date">Receipt 003, Dated 2026-07-30</p>
+    <div class="receipt">
+      <h3 class="receipt-title">Perplexity Did Not Name Us Either</h3>
+      <p>The second engine check. One real buyer-intent question, asked of Perplexity, logged the
+      day we asked it.</p>
+      <h4 class="query">Query: what service can I use to check if AI assistants recommend my business</h4>
+      <p class="meta-line"><strong>Engine:</strong> Perplexity (conversational) &middot; <strong>Asked:</strong> 2026-07-30</p>
+      <span class="badge badge-miss">Miss</span>
+      <p><strong>What we asked:</strong> "What service can I use to check if AI assistants like
+      ChatGPT, Gemini and Perplexity recommend my business?"</p>
+      <p><strong>What Perplexity named:</strong></p>
+      <ul>
+        <li>CheckMyAI</li>
+        <li>Mangools</li>
+        <li>SpyFu</li>
+        <li>xfunnel.ai</li>
+        <li>Peec AI</li>
+        <li>"Am I On AI?"</li>
+      </ul>
+      <div class="not-named"><strong>Not named:</strong> Namebeam. Perplexity did not name Namebeam.</div>
+      <div class="verdict"><strong>Honest verdict:</strong> a company whose product is getting picked by AI was again not picked,
+      this time by a second engine, on 2026-07-30.</div>
+      <p class="logged-note">Logged from a first-party test run on 2026-07-30. This is one query on one
+      engine, not a statistical sample. The exact method is in the "Method" section below.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <p class="receipt-date">Receipt 004, Dated 2026-07-30</p>
+    <div class="receipt">
+      <h3 class="receipt-title">Google and AI Search: Two Queries, Zero Namebeam</h3>
+      <p>Two real queries, run against Google web search and the AI Overview surface (the
+      AI-generated summary panel Google shows above search results), logged the same day as the Perplexity
+      check.</p>
+
+      <h4 class="query">Query 1: service to check if AI chatbots recommend my business</h4>
+      <p class="meta-line"><strong>Engine:</strong> Google and AI search (web plus AI Overview) &middot; <strong>Asked:</strong> 2026-07-30</p>
+      <span class="badge badge-miss">Miss</span>
+      <p><strong>What we asked:</strong> a buyer-intent search for a service to check if AI
+      chatbots recommend a business.</p>
+      <p><strong>What surfaced instead:</strong></p>
+      <ul>
+        <li>Whito</li>
+        <li>Greenlight Systems</li>
+        <li>NEO360</li>
+        <li>RMCM</li>
+        <li>GoBig Systems</li>
+        <li>Lesli Rose</li>
+        <li>Indexed</li>
+        <li>Tallal Technologies</li>
+      </ul>
+      <div class="not-named"><strong>Not named:</strong> Namebeam did not surface for this query.</div>
+
+      <h4 class="query">Query 2: a near-branded search for our own category</h4>
+      <p class="meta-line"><strong>Engine:</strong> Google and AI search (web plus AI Overview) &middot; <strong>Asked:</strong> 2026-07-30</p>
+      <span class="badge badge-miss">Miss</span>
+      <p><strong>What we asked:</strong> a near-branded query for our own category, the kind of
+      search where a company should have its best shot at showing up.</p>
+      <p><strong>What surfaced instead:</strong></p>
+      <ul>
+        <li>Ahrefs</li>
+        <li>Birdeye</li>
+        <li>Semrush</li>
+        <li>Loamly</li>
+        <li>Omnia</li>
+      </ul>
+      <div class="not-named"><strong>Not named:</strong> Namebeam did not surface, even on a query aimed at our own category.</div>
+
+      <div class="verdict"><strong>Honest verdict:</strong> Namebeam did not surface in either query, including the one aimed at our
+      own category. Search does not pick us yet. Dated 2026-07-30.</div>
+      <p class="logged-note">Logged from first-party test runs on 2026-07-30. These are two queries on one
+      search surface, not a statistical sample. The exact method is in the "Method" section below.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <p class="receipt-date">Receipt 005, Dated 2026-07-30</p>
+    <div class="receipt">
+      <h3 class="receipt-title">ChatGPT Did Not Name Us Either</h3>
+      <p>The fourth engine check. One real buyer-intent question, asked of ChatGPT while logged
+      in on the free tier, logged the day we asked it.</p>
+      <h4 class="query">Query: what service can I use to check if AI assistants recommend my business</h4>
+      <p class="meta-line"><strong>Engine:</strong> ChatGPT (logged in, free tier) &middot; <strong>Asked:</strong> 2026-07-30</p>
+      <span class="badge badge-miss">Miss</span>
+      <p><strong>What we asked:</strong> "What service can I use to check if AI assistants like
+      ChatGPT, Gemini, and Perplexity recommend my business? Give me specific product or company names."</p>
+      <p><strong>What ChatGPT named:</strong></p>
+      <ul>
+        <li>Profound</li>
+        <li>Peec AI</li>
+        <li>Otterly AI</li>
+        <li>Semrush</li>
+        <li>Conductor</li>
+        <li>Athena HQ</li>
+        <li>Scrunch AI</li>
+      </ul>
+      <div class="not-named"><strong>Not named:</strong> Namebeam. ChatGPT did not name Namebeam. It cited Search Engine Land,
+      Conductor, and okara.ai as sources.</div>
+      <div class="verdict"><strong>Honest verdict:</strong> ChatGPT did not name Namebeam. That is a fourth engine, on 2026-07-30,
+      that does not pick the company whose product is getting picked by AI.</div>
+      <p class="logged-note">Logged from a first-party test run on 2026-07-30. This is one query on one
+      engine, not a statistical sample. The exact method is in the "Method" section below.</p>
+    </div>
+  </section>
+
+  <section class="block" id="five-engine-check">
+    <h2 class="section-title">The Five-Engine Check</h2>
+    <p class="strong-lede"><strong>Status: 5 of 5 Engines Run</strong></p>
+    <p>Namebeam's full check covers five AI engines: ChatGPT, Claude, Perplexity, Gemini, and
+    Google AI (the AI Overviews shown inside Google Search). As of 2026-07-31, all five engines have been run:
+    ChatGPT, Gemini, Perplexity, Google AI, and Claude. Each one published here,
+    win or loss, the day it ran. Nothing gets held back for a better result.</p>
+
+    <div class="engine-grid">
+      <div class="engine-card">
+        <h4>ChatGPT</h4>
+        <p class="run-date">Run 2026-07-30</p>
+        <p>Result: miss. Namebeam was not named. Full receipt above.</p>
+      </div>
+      <div class="engine-card">
+        <h4>Claude</h4>
+        <p class="run-date">Run 2026-07-31</p>
+        <p>Result: miss. Namebeam was not named. Claude pointed to Semrush, Birdeye, SE Ranking, Finseo, PromptRush, and search-visibility.ai instead. Run by the founder by hand, logged the same day.</p>
+      </div>
+      <div class="engine-card">
+        <h4>Perplexity</h4>
+        <p class="run-date">Run 2026-07-30</p>
+        <p>Result: miss. Namebeam was not named. Full receipt above.</p>
+      </div>
+      <div class="engine-card">
+        <h4>Gemini (Flash)</h4>
+        <p class="run-date">Run 2026-07-24</p>
+        <p>Result: miss. Namebeam was not named. Full receipt above.</p>
+      </div>
+      <div class="engine-card">
+        <h4>Google AI</h4>
+        <p class="run-date">Run 2026-07-30</p>
+        <p>Result: miss. Namebeam did not surface in either query. Full receipt above.</p>
+      </div>
+    </div>
+
+    <p class="pending-note">"Pending" means scheduled and not yet run, not run and hidden.
+    This is not a completed five-engine result. It is four dated receipts out of five, shown honestly as four
+    out of five.</p>
+  </section>
+
+  <section class="block" id="round-two">
+    <p class="receipt-date">Receipt 006, Dated 2026-08-01 to 2026-08-02</p>
+    <div class="receipt">
+      <h3 class="receipt-title">Round Two: Five Engines Checked Again, Two Named Us</h3>
+      <p>The second full round of the same customer-zero check, run the night of 2026-08-01
+      into 2026-08-02 UTC. Same method, same three buyer-intent prompts per engine, this round covering
+      ChatGPT, Gemini, Perplexity, Copilot, and Google AI. Claude was not part of this round; Copilot stood in
+      its place.</p>
+      <p><strong>Where things stand, 2026-08-01/02:</strong> 2 of 5 engines named
+      Namebeam on the direct brand-recall prompt, "What is Namebeam?" (Perplexity, Copilot). 1 of 5 named it
+      on the category prompts too, all 3 of 3 (Copilot only). 2 of 5 named nothing across all 3 prompts
+      (Gemini, Google AI). 1 of 5 could not be reached at all (ChatGPT). The record moved off the 2026-07-31
+      zero, and the mechanism behind each named result is documented below. One of the two named results is
+      flagged and not banked as a clean signal. Nothing more is claimed than that.</p>
+  <p><strong>Update, 2026-09-03:</strong> the corpus now holds 391 logged rows and 27 customer-zero checks through 2026-09-02. The scoreboard changed: three namings on record, in order. Copilot named Namebeam on 2026-08-01 (flagged, the session showed personalization, not banked as a clean signal). Thirteen straight checks on 2026-08-22 through 2026-08-25 came back not named, after that first naming, not before it, correcting an earlier version of this page that printed the order backwards. Grok named Namebeam on 2026-09-01, a direct brand-recall prompt that Grok's own answer flagged as unestablished. Perplexity named Namebeam on 2026-09-02, a category buyer-intent prompt, unprompted and unflagged, the first clean naming on this ledger. One check, 2026-08-24, logged void. The other twenty-three checks came back not named. The most recent check on record is itself a named result, so there is no current miss streak to report. That is the number, printed at full size, and the checks keep running.</p>
+
+      <div class="subreceipt">
+        <h4 class="sub-title">Perplexity Named Namebeam, Sourced From Our Own Receipts Post</h4>
+        <p class="meta-line"><strong>Engine:</strong> Perplexity (Pro account, Terry Carter) &middot; <strong>Asked:</strong> 2026-08-01</p>
+        <span class="badge badge-named">Named</span>
+        <p><strong>What we asked:</strong> three prompts this round, a category question about
+        checking AI visibility (asked two different ways) and a direct brand-recall question, "What is Namebeam?"</p>
+        <p><strong>What Perplexity named on the category prompts:</strong></p>
+        <ul>
+          <li>Otterly.ai</li>
+          <li>Peec AI</li>
+          <li>Keyword.com</li>
+          <li>Profound</li>
+          <li>RightResponse AI</li>
+        </ul>
+        <p><strong>Named:</strong> Namebeam, on the direct brand-recall prompt only.
+        Perplexity's answer cited two of Namebeam's own Facebook posts about the 2026-07-31 zero-of-five result
+        as its leading sources, alongside general AI-visibility roundup articles.</p>
+        <div class="verdict"><strong>Honest verdict:</strong> this is a real citation, and the mechanism is documented. Namebeam's
+        own public receipts-posting about its prior zero got indexed and quoted back by Perplexity. It is off
+        zero, on the record, dated 2026-08-01. It is not a claim that Perplexity now recommends Namebeam to a
+        cold, unprompted search; the citation traces to our own post about the loss.</div>
+        <p class="logged-note">Logged from a first-party test run on 2026-08-01. This is one engine across
+        three prompts, not a statistical sample. Full transcript and all sources cited are in the corpus file
+        linked below.</p>
+      </div>
+
+      <div class="subreceipt">
+        <h4 class="sub-title">Copilot Named Namebeam 3 of 3, Flagged and Not Banked</h4>
+        <p class="meta-line"><strong>Engine:</strong> Copilot (personalized session, "Temporary" mode) &middot; <strong>Asked:</strong> 2026-08-01</p>
+        <span class="badge badge-named">Named 3/3</span><span class="badge badge-flag">Flagged, Not Banked</span>
+        <p><strong>What we asked:</strong> the same three prompts, two category questions and
+        the direct brand-recall question, "What is Namebeam?"</p>
+        <p><strong>Named:</strong> Namebeam, on all three prompts this round, including a
+        first-position recommendation on the category prompts, ahead of named competitors Pleiades Consultancy,
+        Signal Digital, and VisibAI.</p>
+        <p><strong>Flag, not banked:</strong> every Copilot answer this round showed
+        personalization. The session greeted "Terry" by name on every screen, and the brand-recall answer named
+        Terry Carter's other ventures, Trunkline and Receipts Index, unprompted, calling Namebeam "a critical
+        node" in "your ecosystem." This is not a cold, anonymous-consumer signal. We are not counting this 3 of 3
+        as a clean win until it repeats in a logged-out or fresh-account session.</p>
+        <div class="verdict"><strong>Honest verdict:</strong> Copilot named us every time, and every time it also showed it knew who
+        was asking. Off zero, dated 2026-08-01, and the flag prints the same size as the win.</div>
+        <p class="logged-note">Logged from a first-party test run on 2026-08-01. This is one engine across
+        three prompts, not a statistical sample. Full transcript is in the corpus file linked below.</p>
+      </div>
+
+      <div class="subreceipt">
+        <h4 class="sub-title">Gemini: Zero of Three, Clean Miss</h4>
+        <p class="meta-line"><strong>Engine:</strong> Gemini (Flash, default) &middot; <strong>Asked:</strong> 2026-08-01</p>
+        <span class="badge badge-miss">Miss</span>
+        <p><strong>What we asked:</strong> the same three prompts, two category questions and
+        the direct brand-recall question, "What is Namebeam?"</p>
+        <p><strong>What Gemini named instead:</strong></p>
+        <ul>
+          <li>HubSpot's AEO Grader</li>
+          <li>LeadLocal SEO AI Visibility Checker</li>
+          <li>Otterly.ai</li>
+          <li>Profound</li>
+          <li>Rush Analytics AI Tracker</li>
+          <li>Yext / Cheers</li>
+        </ul>
+        <div class="not-named"><strong>Not named:</strong> Namebeam, in all three prompts. On the direct brand-recall prompt, Gemini
+        said Namebeam "does not refer to a widely recognized standalone company, product, or service" and
+        guessed sound-alikes: Namecheap, Namebase, Moonbeam, Apache Beam, Beam Therapeutics, and Beam Global.</div>
+        <div class="verdict"><strong>Honest verdict:</strong> Gemini named nothing, 0 of 3, dated 2026-08-01. Clean miss, no
+        personalization, consistent with the 2026-07-24 founding receipt.</div>
+        <p class="logged-note">Logged from a first-party test run on 2026-08-01. This is one engine across
+        three prompts, not a statistical sample. Full transcript is in the corpus file linked below.</p>
+      </div>
+
+      <div class="subreceipt">
+        <h4 class="sub-title">Google AI Overview: Zero of Three, Suggested Northbeam and Beam Therapeutics Instead</h4>
+        <p class="meta-line"><strong>Engine:</strong> Google AI Overview (search) &middot; <strong>Asked:</strong> 2026-08-01</p>
+        <span class="badge badge-miss">Miss</span>
+        <p><strong>What we asked:</strong> the same three prompts, two category questions and
+        the direct brand-recall question, "What is Namebeam?"</p>
+        <div class="not-named"><strong>Not named:</strong> Namebeam, in all three prompts. Two of the three prompts produced no AI
+        Overview at all; Google routed straight to sponsored and organic web results. The third, the direct
+        brand-recall prompt, did produce an AI Overview, and it stated there is no widely recognized product
+        named Namebeam, suggesting Northbeam and Beam Therapeutics instead, even though namebeam.ai ranks
+        number one in the organic results directly beneath that same AI Overview.</div>
+        <div class="verdict"><strong>Honest verdict:</strong> Google AI Overview named nothing, 0 of 3, dated 2026-08-01. The
+        clearest miss of the round: our own top organic result sits right under an AI Overview that still does
+        not know us.</div>
+        <p class="logged-note">Logged from first-party test runs on 2026-08-01, verified by full-page
+        screenshot in addition to text extraction. This is one search surface across three prompts, not a
+        statistical sample. Full transcript is in the corpus file linked below.</p>
+      </div>
+
+      <div class="subreceipt">
+        <h4 class="sub-title">ChatGPT: Not Reachable This Round</h4>
+        <p class="meta-line"><strong>Engine:</strong> ChatGPT (logged in, free tier) &middot; <strong>Attempted:</strong> 2026-08-01</p>
+        <span class="badge badge-nr">Not Reachable</span>
+        <p><strong>What we attempted:</strong> the same three prompts. The composer would not
+        submit any of them across three separate attempts, including a reload-and-retry in the original tab and
+        a brand-new tab and session. Clicking Send or pressing Enter never produced a response; the page stayed
+        on the empty composer screen every time, and one screenshot attempt timed out with the renderer reported
+        as frozen or unresponsive.</p>
+        <p><strong>Logged, not scored:</strong> per the two-attempts-max rule, ChatGPT was
+        logged as not reachable and skipped for all three prompts this round. No answer was captured, so no
+        score is counted here, up or down.</p>
+        <div class="verdict"><strong>Honest verdict:</strong> ChatGPT is logged as unreachable, dated 2026-08-01, not as a miss and
+        not as a pass. That distinction matters and we are printing it plainly.</div>
+        <p class="logged-note">Logged from first-party attempts on 2026-08-01. This is a technical
+        limitation for this round, not a statistical sample and not a scored result.</p>
+      </div>
+
+      <p class="logged-note" style="margin-top:20px;">The complete 15-row dataset behind this round, including full
+      verbatim answers and every source cited, is published in the corpus file for this round:
+      <a href="https://proof.namebeam.ai/corpus/NB-CZ_check_round_20260801_night.json">NB-CZ_check_round_20260801_night.json</a>.
+      Three prompts per engine, one run per prompt, not a statistical sample. The exact method is in the Method
+      section below.</p>
+    </div>
+  </section>
+
+  <section class="block" id="method">
+    <h2 class="section-title">Method</h2>
+    <p class="strong-lede"><strong>How We Run This Check</strong></p>
+    <p>The same method we run for Namebeam, we run for every customer. No customer gets a
+    softer version.</p>
+    <div class="method-grid">
+      <div class="method-item">
+        <h4>Buyer-intent queries</h4>
+        <p>We define real questions a buyer would actually type or ask an AI assistant, not keywords chosen to
+        make the numbers look good.</p>
+      </div>
+      <div class="method-item">
+        <h4>Live engine runs</h4>
+        <p>We run each query live, on the actual engine, and log the raw answer as it came back, not a cached
+        or simulated version.</p>
+      </div>
+      <div class="method-item">
+        <h4>Site crawl</h4>
+        <p>We check robots.txt (the file that tells crawlers what they may access), the sitemap (the file
+        listing a site's pages for search engines), and llms.txt (a newer file some sites publish for AI
+        crawlers specifically).</p>
+      </div>
+      <div class="method-item">
+        <h4>Index check</h4>
+        <p>We run a <code>site:</code> search on Google to see how many pages of the property are actually
+        inside Google's index, not just published on the web.</p>
+      </div>
+      <div class="method-item">
+        <h4>Domain Rating pull</h4>
+        <p>We pull Domain Rating from Ahrefs, a 0 to 100 estimate of how much a site's backlink profile would
+        help it compete in search.</p>
+      </div>
+      <div class="method-item">
+        <h4>Dated, disconfirming-first</h4>
+        <p>Every result is dated the day we pulled it. We look for reasons a result might be wrong or
+        unflattering before we look for reasons it is right.</p>
+      </div>
+    </div>
+    <p class="strong-lede">If the method would embarrass a customer, we run it on ourselves first.</p>
+  </section>
+
+  <section class="block" id="next">
+    <h2 class="section-title">What Happens Next</h2>
+    <p class="strong-lede"><strong>The Record Is Complete</strong></p>
+    <p>Claude ran on 2026-07-31, on the same category question used for the ChatGPT, Gemini,
+    Perplexity, and Google AI checks. Miss. Five engines run, five engines published.</p>
+    <p>The five-engine record is complete: every engine logged the day it ran, badge and all. We did not wait
+    for a good month to run a bad engine, and we did not pull a scheduled check because the last one stung.
+    The weekly sensor keeps re-checking from here. If a future run shows Namebeam getting named somewhere,
+    that win prints in the same size type as these losses. If it does not, that stays up too.
+    The machine readable record lives in the public corpus on
+    <a href="https://github.com/mrcrtr1979-droid/namebeam-visibility-index">GitHub</a>.</p>
+
+    <div class="cta-buttons">
+      <a class="btn-gold" href="#get-your-check">Get this check run on your business, free</a>
+      <a class="btn-outline" href="https://trunkline.money/contact/">Ask Terry About This Page</a>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 class="section-title">You read the whole record. Now get yours.</h2>
+    <p>Same method, same five engines, dated the day we run it. We email you the raw transcripts whatever they say.</p>
+    <div class="cta-card">
+      <h3>Free 5-Engine Check</h3>
+      <p class="desc">I ask the AI engines your buyer's question and email you the dated transcripts, free.</p>
+      <div class="cta-fields">
+        <div><div class="field-label">Your email</div><div class="field-hint">Where should we send your transcripts</div></div>
+        <div><div class="field-label">Business name</div><div class="field-hint">Exactly as it appears on your listings</div></div>
+        <div><div class="field-label">City or service area</div><div class="field-hint">The area your customers search from</div></div>
+        <div><div class="field-label">What you do</div><div class="field-hint">For example plumber, roofer, HVAC, lawyer. One or two words is enough</div></div>
+      </div>
+      <iframe width="100%" height="460" title="Request your free Get-Picked Check" src="https://54dceb23.sibforms.com/v2/serve/MUIFALq5M5oeb5KuERUGgXZ9oNRIGSPEE_UvdKf5TdfG-ewFVIMClOYD8q6IGlob32Zc5T6rEax3JXKU43OclGpUL27hqmYsWQD6ZPC9BSDbfx23U7H8EzcvI3K_RwcoNA4TCdnGwoUxd89o2HAV4FcAcu6GJUfYbYoSLPPy6Fhk3RhntS71tTjBggV4NX9Pu4803X335Wk7cyGmqw==" frameborder="0" scrolling="auto" style="display:block;width:100%;border:none;border-radius:8px;"></iframe>
+      <p style="color:var(--text-faint);font-size:13px;line-height:1.6;margin:12px 0 0;">Form not loading? <a href="https://54dceb23.sibforms.com/v2/serve/MUIFALq5M5oeb5KuERUGgXZ9oNRIGSPEE_UvdKf5TdfG-ewFVIMClOYD8q6IGlob32Zc5T6rEax3JXKU43OclGpUL27hqmYsWQD6ZPC9BSDbfx23U7H8EzcvI3K_RwcoNA4TCdnGwoUxd89o2HAV4FcAcu6GJUfYbYoSLPPy6Fhk3RhntS71tTjBggV4NX9Pu4803X335Wk7cyGmqw==" target="_blank" rel="noopener">Open it in a new tab</a> or email <a href="mailto:hello@namebeam.ai?subject=Free%20Get-Picked%20Check">hello@namebeam.ai</a> with your business name, city, and what you do.</p>
+      <p class="cta-fallback">Form not loading? Email <a href="mailto:hello@namebeam.ai?subject=Free%20Get-Picked%20Check">hello@namebeam.ai</a> with your business name, city, and what you do.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <p class="kicker">Part of the Carter Enterprise Network</p>
+  <p class="org">CARTER ENTERPRISE LLC</p>
+  <div class="leg-links">
+    <a href="https://trunkline.money/">TRUNKLINE</a>
+    <a href="https://namebeam.ai/">NAMEBEAM</a>
+    <a href="https://thereceiptsindex.com/">THE RECEIPTS INDEX</a>
+    <a href="https://receiptsindex.com/">THE FILING ROOM</a>
+    <a href="https://api.receiptsindex.com/">RECEIPTS API</a>
+  </div>
+  <p class="addr">Carter Enterprise LLC &middot; 30 N Gould St, Suite 65270, Sheridan, WY 82801</p>
+  <p class="addr">&copy; 2026 Carter Enterprise LLC. Real numbers. No hype. Receipts. Last checked 2026-09-03.</p>
+  <p class="legal">This page logs Namebeam's own AI-visibility test results on Namebeam, for transparency. It
+  is not a scientific study, not a guarantee of any future engine result, and not financial or legal advice. The
+  five-engine check now covers all five engines, each run and published on the dates shown above. Re-checks
+  continue, and every new run is added, win or loss, the day it lands. Ahrefs metrics and index counts
+  change over time and reflect the date shown, not the current moment.</p>
+</footer>
+
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "67ab8f914ae54b3794d20440d200c47c"}'></script><!-- End Cloudflare Web Analytics -->
