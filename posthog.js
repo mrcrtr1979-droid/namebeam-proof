@@ -40,8 +40,7 @@
   try {
     var FK = 'home-cta-test', host = location.hostname.replace(/^www\./, ''), home = location.pathname === '/' || location.pathname === '/index.html';
     var CTA = { 'namebeam.ai': ['.cta-row a.btn[href="#explorer"]', 'Explore every market', 'Look up my market'],
-                'markets.namebeam.ai': ['header nav a.btn[href="/check/"]', 'Free check', 'Run my free check'],
-                'proof.namebeam.ai': ['a.btn-gold[href="#get-your-check"]', 'Get this check run on your business, free', 'See the dated record for a market'] }[host];
+                'markets.namebeam.ai': ['header nav a.btn[href="/check/"]', 'Free check', 'Run my free check'] }[host];
     if (CTA && home) window.posthog.onFeatureFlags(function (flags, variants) {
       try {
         if (!variants || !variants[FK]) return;
